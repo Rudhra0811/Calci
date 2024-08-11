@@ -24,6 +24,9 @@ class Calculator {
                 this.currentOperand += number.toString();
             }
         }
+        if (this.currentOperand.length > 9) {
+            this.currentOperand = parseFloat(this.currentOperand).toExponential(2);
+        }
     }
 
     chooseOperation(operation) {
@@ -77,7 +80,22 @@ class Calculator {
     }
 
     percentage() {
-        this.currentOperand = (parseFloat(this.currentOperand) / 100).toString();
+        const current = parseFloat(this.currentOperand);
+        if (this.previousOperand && this.operation) {
+            const prev = parseFloat(this.previousOperand);
+            switch (this.operation) {
+                case '+':
+                case '-':
+                    this.currentOperand = (prev * current / 100).toString();
+                    break;
+                case '×':
+                case '÷':
+                    this.currentOperand = (current / 100).toString();
+                    break;
+            }
+        } else {
+            this.currentOperand = (current / 100).toString();
+        }
     }
 
     getDisplayNumber(number) {
@@ -154,7 +172,6 @@ operatorButtons.forEach(button => {
     });
 });
 
-// Keyboard support
 document.addEventListener('keydown', (event) => {
     if (event.key >= '0' && event.key <= '9' || event.key === '.') {
         calculator.appendNumber(event.key);
@@ -171,3 +188,29 @@ document.addEventListener('keydown', (event) => {
     }
     calculator.updateDisplay();
 });
+
+// Dark mode toggle functionality
+const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+const currentTheme = localStorage.getItem('theme');
+
+if (currentTheme) {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    if (currentTheme === 'dark') {
+        toggleSwitch.checked = true;
+        document.body.classList.add('dark-mode');
+    }
+}
+
+function switchTheme(e) {
+    if (e.target.checked) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+    }    
+}
+
+toggleSwitch.addEventListener('change', switchTheme, false);
